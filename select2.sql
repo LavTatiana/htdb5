@@ -11,7 +11,8 @@ select album_name, avg(duration) from album a
 	order by avg(duration) desc;
 select artist_name from artist a 
 	join album a2 on a.id = a2.id 
-	where release_year != 2020
+	where release_year not in (select release_year from album a3
+		where release_year = 2020)
 	group by artist_name;
 select distinct mix_name, artist_name from mix m
 	join trackinfo t on t.mix_id = m.id 
@@ -35,11 +36,14 @@ select artist_name from artist a
 	join album a2 on m.album_id = a2.id 
 	join track t on t.album_id = a2.id
 	where duration = (select min(duration) from track t2);
-select album_name, count(track_name) from album a 
-	join track t on t.album_id =  a.id
-	group by album_name 
-	order by count(track_name) asc
-	limit 1;
+select distinct album_name from album a 
+	left join track t on a.id = t.album_id
+	where album_id in(
+		select album_id from track
+		inner join album a2 on t.album_id= a2.id 		
+		group by album_id
+		order by count(album_id)
+		limit 1);
 	
 	 
 	
